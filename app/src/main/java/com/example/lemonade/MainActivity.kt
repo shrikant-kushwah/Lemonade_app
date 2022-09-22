@@ -1,18 +1,3 @@
-/*
- * Copyright (C) 2021 The Android Open Source Project.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.example.lemonade
 
 import androidx.appcompat.app.AppCompatActivity
@@ -67,10 +52,11 @@ class MainActivity : AppCompatActivity() {
         setViewElements()
         lemonImage!!.setOnClickListener {
             // TODO: call the method that handles the state when the image is clicked
+            clickLemonImage()
         }
         lemonImage!!.setOnLongClickListener {
             // TODO: replace 'false' with a call to the function that shows the squeeze count
-            false
+            showSnackbar()
         }
     }
 
@@ -96,6 +82,29 @@ class MainActivity : AppCompatActivity() {
         //  lemonade making progression (or at least make some changes to the current state in the
         //  case of squeezing the lemon). That should be done in this conditional statement
 
+        when(lemonadeState){
+            SELECT->{
+                lemonadeState=SQUEEZE
+                lemonSize=lemonTree.pick()
+                squeezeCount=0
+            }
+            SQUEEZE->{
+                squeezeCount++
+                lemonSize--
+
+                if (lemonSize==0){
+                    lemonadeState=DRINK
+                    lemonSize=-1
+                }
+            }
+            DRINK->{
+                lemonadeState=RESTART
+            }
+            RESTART->{
+                lemonadeState=SELECT
+            }
+        }
+
         // TODO: When the image is clicked in the SELECT state, the state should become SQUEEZE
         //  - The lemonSize variable needs to be set using the 'pick()' method in the LemonTree class
         //  - The squeezeCount should be 0 since we haven't squeezed any lemons just yet.
@@ -111,6 +120,7 @@ class MainActivity : AppCompatActivity() {
 
         // TODO: lastly, before the function terminates we need to set the view elements so that the
         //  UI can reflect the correct state
+        setViewElements()
     }
 
     /**
@@ -126,6 +136,29 @@ class MainActivity : AppCompatActivity() {
         // TODO: Additionally, for each state, the lemonImage should be set to the corresponding
         //  drawable from the drawable resources. The drawables have the same names as the strings
         //  but remember that they are drawables, not strings.
+
+        val stateImage = when(lemonadeState){
+            SELECT->R.drawable.lemon_tree
+            SQUEEZE->R.drawable.lemon_squeeze
+            DRINK->R.drawable.lemon_drink
+
+            else->{
+                R.drawable.lemon_restart
+            }
+        }
+        val stateText = when(lemonadeState){
+            SELECT->R.string.lemon_select
+            SQUEEZE->R.string.lemon_squeeze
+            DRINK->R.string.lemon_drink
+
+            else->{
+                R.string.lemon_empty_glass
+            }
+        }
+
+        textAction.setText(stateText)
+        lemonImage?.setImageResource(stateImage)
+
     }
 
     /**
